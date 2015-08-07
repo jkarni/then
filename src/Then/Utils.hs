@@ -1,10 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Then.Utils where
+module Then.Utils (loginError, errWithBody, newToken) where
 
 import Data.Aeson (encode)
 import Servant (ServantErr(..))
 import Then.Types
 import Data.Text ()
+import System.IO.Unsafe (unsafePerformIO)
+
+import qualified Crypto.Nonce as Nonce
 
 -- * Errors
 

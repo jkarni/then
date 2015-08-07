@@ -1,14 +1,27 @@
 {-# LANGUAGE DeriveAnyClass    #-}
 {-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
-module Then.Types where
+module Then.Types (
+    Error(..)
+  , ErrorResponse(..)
+  , LoginByUsername(..)
+  , LoginByEmail(..)
+  , LoginResult(..)
+  , Status(..)
+  , User(..)
+  , newToken
+  ) where
 
+import           Control.Monad
+import qualified Crypto.Nonce as Nonce
 import           Data.Aeson                         hiding (Success)
+import qualified Data.ByteString                    as BS
+import qualified Data.ByteString.Char8              as BSC
 import qualified Data.Text                          as Text
+import           System.IO.Unsafe (unsafePerformIO)
 import           GHC.Generics                       (Generic)
 import           Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
 
-type Token = Text.Text
 
 -- * Errors
 
@@ -50,6 +63,7 @@ data Status = Success | Failure
 instance FromJSON Status where
     parseJSON (String "success") = return Success
     parseJSON (String "error")   = return Failure
+    parseJSON _                  = mzero
 
 instance ToJSON Status where
     toJSON Success = String "success"
@@ -60,7 +74,7 @@ data LoginResult = LoginResult
     { loginResultStatus   :: Status
     , loginResultUserPath :: Text.Text
     , loginResultToken    :: Token
-    } deriving (Eq, Show, Generic, Read)
+    } deriving (Eq, Show, Generic)
 
 instance ToJSON LoginResult where
     toJSON (LoginResult status path token) = object [ "status" .= status
@@ -68,6 +82,22 @@ instance ToJSON LoginResult where
                                                     , "user_token" .= token
                                                     ]
 
+-- * Token
+
+-- | 1024-bit baseurl64-encoding-compliant nonce.
+newtype Token = Token { unToken :: BS.ByteString }
+  deriving (Eq, Show)
+
+
+newToken :: IO Token
+newToken = Token . mconcat <$> (sequence . replicate 8 $ Nonce.nonce128url nonceGen)
+
+nonceGen :: Nonce.Generator
+nonceGen = unsafePerformIO Nonce.new
+{-# NOINLINE nonceGen #-}
+
+instance ToJSON Token where
+    toJSON = toJSON . BSC.unpack . unToken
 
 -- * User
 

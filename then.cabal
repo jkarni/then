@@ -30,6 +30,7 @@ library
                      , http-reverse-proxy
                      , http-types
                      , mtl == 2.2.*
+                     , nonce > 1 && < 2
                      , transformers == 0.4.*
                      , postgresql-simple >= 0.4 && < 0.5
                      , servant >= 0.4 && < 0.5

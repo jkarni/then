@@ -35,8 +35,6 @@ loginByUsername conn lbu = do
 loginByEmail :: Connection -> LoginByEmail -> EitherT ServantErr IO LoginResult
 loginByEmail = undefined
 
-newToken :: IO Token
-newToken = undefined
 
 -- | Should only be called after email validation or for testing
 createUser :: Connection -> User -> IO ()
