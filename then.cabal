@@ -11,6 +11,7 @@ maintainer:          jkarni@gmail.com
 build-type:          Simple
 -- extra-source-files:
 cabal-version:       >=1.10
+data-files:          schema/then.sql
 
 library
   exposed-modules:     Then
@@ -51,6 +52,7 @@ test-suite spec
                      , text
                      , then
                      , postgresql-simple
+                     , process
                      , servant-server
                      , wai
                      , warp

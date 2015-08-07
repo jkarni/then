@@ -10,11 +10,10 @@ import           Servant
 
 import           Then.Types
 
-loginByUsername :: ConnectInfo -> LoginByUsername -> EitherT ServantErr IO LoginResult
-loginByUsername cinfo lbu = do
+loginByUsername :: Connection -> LoginByUsername -> EitherT ServantErr IO LoginResult
+loginByUsername conn lbu = do
   let usr = loginByUsernameName lbu
-  conn <- liftIO $ connect cinfo
-  pwds <- liftIO $ query conn "SELECT password FROM users where username = ?" (Only usr)
+  pwds <- liftIO $ query conn "SELECT password FROM user where username = ?" (Only usr)
   pwd  <- case pwds of
     [pwd] -> if pwd /= loginByUsernamePassword lbu then left err400 else return pwd
     _     -> left err400
@@ -25,7 +24,7 @@ loginByUsername cinfo lbu = do
     , loginResultToken    = token
     }
 
-loginByEmail :: ConnectInfo -> LoginByEmail -> EitherT ServantErr IO LoginResult
+loginByEmail :: Connection -> LoginByEmail -> EitherT ServantErr IO LoginResult
 loginByEmail = undefined
 
 newToken :: IO Token

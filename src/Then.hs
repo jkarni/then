@@ -2,6 +2,8 @@
 {-# LANGUAGE TypeOperators #-}
 module Then where
 
+import qualified Data.ByteString.Char8      as BS
+import           Data.Monoid
 import           Data.Proxy
 import           Database.PostgreSQL.Simple
 import           Network.HTTP.Client        (Manager, defaultManagerSettings,
@@ -26,7 +28,7 @@ api = Proxy
 proxyDest :: ProxyDest
 proxyDest = undefined
 
-server :: Manager -> ConnectInfo -> Server API
+server :: Manager -> Connection -> Server API
 server mgr cinfo
   =    loginByUsername cinfo
   :<|> loginByEmail cinfo
@@ -35,4 +37,8 @@ server mgr cinfo
 main :: IO ()
 main = do
     mgr <- newManager defaultManagerSettings
-    run 8080 . serve api $ server mgr defaultConnectInfo
+    conn <- connectPostgreSQL $ BS.pack $ "dbname=" <> dbName
+    run 8080 . serve api $ server mgr conn
+
+dbName :: String
+dbName = "thendb"

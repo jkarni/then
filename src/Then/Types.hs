@@ -6,6 +6,7 @@ import Data.Aeson hiding (Success)
 
 type Token = String
 
+
 data LoginByUsername = LoginByUsername
     { loginByUsernameName     :: String
     , loginByUsernamePassword :: String
