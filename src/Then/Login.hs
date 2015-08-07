@@ -13,6 +13,7 @@ import           Servant
 import           Then.Types
 import           Then.Utils
 
+
 loginByUsername :: Connection -> LoginByUsername -> EitherT ServantErr IO LoginResult
 loginByUsername conn lbu = do
   let usr = loginByUsernameName lbu
@@ -35,7 +36,7 @@ loginByEmail :: Connection -> LoginByEmail -> EitherT ServantErr IO LoginResult
 loginByEmail = undefined
 
 createAccount :: Connection -> UserCreation -> EitherT ServantErr IO LoginResult
-createAccount = undefined
+createAccount conn (UserCreation usr) = undefined
 
 -- | Should only be called after email validation or for testing
 createUser :: Connection -> User -> IO ()

@@ -4,6 +4,7 @@ module Then.LoginSpec (spec) where
 
 import           Control.Monad.Trans.Either
 import           Data.Aeson                 (decode)
+import           Data.Char                  (isPrint)
 import           Data.Maybe                 (fromJust)
 import           Data.Either                (isRight)
 import qualified Data.Text                  as Text
@@ -15,12 +16,13 @@ import           Then.Login
 import           Then.Utils
 import           Then.Types
 
-import           Then.Arbitrary             (AsciiText(..))
+import           Then.Arbitrary             ()
 import           Then.Test.Utils
 
 spec :: Spec
 spec = do
   loginByUsernameSpec
+  createAccountSpec
 
 loginByUsernameSpec :: Spec
 loginByUsernameSpec = beforeAll setupDB $ describe "loginByUsername" $ do
@@ -62,16 +64,47 @@ loginByUsernameSpec = beforeAll setupDB $ describe "loginByUsername" $ do
 
   context "the user exists, and the password is correct" $ do
 
-    it "returns a Right" $ \conn -> property $ \(AsciiText name) (AsciiText pwd) (AsciiText email) ->
-      Text.length name <= 80 ==> do
+    let printable = fmap (Text.filter isPrint)
+
+    it "returns a Right" $ \conn -> property $ \name' pwd' email' ->
+      let [name, pwd, email] = printable [name', pwd', email']
+      in Text.length name <= 80 ==> do
         let u = LoginByUsername name pwd
         withUser conn (User name pwd email) $ do
           x <- runEitherT $ loginByUsername conn u
           x `shouldSatisfy` isRight
 
-    it "returns a Status Success" $ \conn -> property $ \(AsciiText name) (AsciiText pwd) (AsciiText email) ->
-      Text.length name <= 80 ==> do
+    it "returns a Status Success" $ \conn -> property $ \name' pwd' email' ->
+      let [name, pwd, email] = printable [name', pwd', email']
+      in Text.length name <= 80 ==> do
         let u = LoginByUsername name pwd
         withUser conn (User name pwd email) $ do
           Right x <- runEitherT $ loginByUsername conn u
           loginResultStatus x `shouldBe` Success
+
+createAccountSpec :: Spec
+createAccountSpec = before setupDB $ do
+
+  context "the username is taken" $ do
+    let testUser1 = User { username = "Henry Every"
+                         , email = "enjoying@the.vu"
+                         , password = "arr" }
+
+    it "returns 400 username taken error" $ \conn -> do
+      withUser conn testUser $ createAccount conn (UserCreation testUser1)
+        `shouldLeftReturn` (err400 `errWithBody` [usernameTakenError])
+
+  context "the email is taken" $ do
+    let testUser1 = User { username = "Henry Cow"
+                         , email = "suntanning@still.nu"
+                         , password = "arr" }
+
+    it "returns 400 email taken error" $ \conn -> do
+      withUser conn testUser $ createAccount conn (UserCreation testUser1)
+        `shouldLeftReturn` (err400 `errWithBody` [emailTakenError])
+
+
+testUser :: User
+testUser = User { username = "Henry Every"
+                , email = "suntanning@still.nu"
+                , password = "arr" }
