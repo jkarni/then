@@ -9,7 +9,9 @@ module Then.Types (
   , LoginResult(..)
   , Status(..)
   , User(..)
+  , UserCreation(..)
   , newToken
+  , unToken
   ) where
 
 import           Control.Monad
@@ -81,6 +83,18 @@ instance ToJSON LoginResult where
                                                     , "user_path" .= path
                                                     , "user_token" .= token
                                                     ]
+
+newtype UserCreation = UserCreation { unUserCreation :: User }
+  deriving (Eq, Show, Generic, Read)
+
+instance FromJSON UserCreation where
+    parseJSON (Object v) = do
+       d <- v .: "data"
+       name  <- (d .: "adhocracy_core.sheets.principal.IUserBasic") >>=  (.: "name")
+       ema   <- (d .: "adhocracy_core.sheets.principal.IUserExtended") >>= (.: "email")
+       pwd   <- (d .: "adhocracy_core.sheets.principal.IPasswordAuthentication") >>= (.: "password")
+       return $! UserCreation (User { username = name, email = ema, password = pwd })
+
 
 -- * Token
 

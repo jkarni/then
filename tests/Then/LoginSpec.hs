@@ -68,3 +68,10 @@ loginByUsernameSpec = beforeAll setupDB $ describe "loginByUsername" $ do
         withUser conn (User name pwd email) $ do
           x <- runEitherT $ loginByUsername conn u
           x `shouldSatisfy` isRight
+
+    it "returns a Status Success" $ \conn -> property $ \(AsciiText name) (AsciiText pwd) (AsciiText email) ->
+      Text.length name <= 80 ==> do
+        let u = LoginByUsername name pwd
+        withUser conn (User name pwd email) $ do
+          Right x <- runEitherT $ loginByUsername conn u
+          loginResultStatus x `shouldBe` Success
