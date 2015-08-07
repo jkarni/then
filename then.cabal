@@ -1,0 +1,61 @@
+name:                then
+version:             0.1.0.0
+-- synopsis:
+-- description:
+-- license:
+license-file:        LICENSE
+author:              Julian K. Arni
+maintainer:          jkarni@gmail.com
+-- copyright:
+-- category:
+build-type:          Simple
+-- extra-source-files:
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Then
+                     , Then.Login
+                     , Then.Proxy
+                     , Then.Types
+  build-depends:       base >=4.8 && <4.9
+                     , aeson
+                     , bytestring
+                     , either
+                     , http-client
+                     , http-reverse-proxy
+                     , http-types
+                     , mtl == 2.2.*
+                     , transformers == 0.4.*
+                     , postgresql-simple >= 0.4 && < 0.5
+                     , servant >= 0.4 && < 0.5
+                     , servant-server >= 0.4 && < 0.5
+                     , wai >= 3.0 && < 3.3
+                     , warp >= 3.0 && < 3.3
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+
+test-suite spec
+  main-is:             Spec.hs
+  build-depends:       base >=4.8 && <4.9
+                     , aeson
+                     , bytestring
+                     , case-insensitive
+                     , either
+                     , hspec
+                     , http-client
+                     , http-reverse-proxy
+                     , http-types
+                     , lens
+                     , lens-aeson
+                     , QuickCheck
+                     , text
+                     , then
+                     , postgresql-simple
+                     , servant-server
+                     , wai
+                     , warp
+                     , wreq
+  ghc-options:         -Wall -threaded -rtsopts
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      tests
+  default-language:    Haskell2010
