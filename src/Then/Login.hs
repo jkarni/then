@@ -13,7 +13,7 @@ import           Then.Types
 loginByUsername :: Connection -> LoginByUsername -> EitherT ServantErr IO LoginResult
 loginByUsername conn lbu = do
   let usr = loginByUsernameName lbu
-  pwds <- liftIO $ query conn "SELECT password FROM user where username = ?" (Only usr)
+  pwds <- liftIO $ query conn "SELECT password FROM account where username = ?" (Only usr)
   pwd  <- case pwds of
     [pwd] -> if pwd /= loginByUsernamePassword lbu then left err400 else return pwd
     _     -> left err400
