@@ -9,7 +9,10 @@ maintainer:          jkarni@gmail.com
 -- copyright:
 -- category:
 build-type:          Simple
--- extra-source-files:
+extra-source-files:  tests/Then/Test/Utils.hs
+                   , tests/Then/Arbitrary.hs
+                   , tests/Then/LoginSpec.hs
+                   , tests/Then/ProxySpec.hs
 cabal-version:       >=1.10
 data-files:          schema/then.sql
 

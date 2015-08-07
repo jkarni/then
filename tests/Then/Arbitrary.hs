@@ -12,6 +12,7 @@ import           GHC.Generics              (Generic)
 import           Test.QuickCheck
 
 import qualified Data.ByteString.Char8     as BS
+import qualified Data.Text                 as Text
 
 import Then.Types
 
@@ -53,3 +54,6 @@ instance (FoldCase a, Arbitrary a) => Arbitrary (CI a) where
 
 instance Arbitrary ByteString where
     arbitrary = BS.pack <$> arbitrary
+
+instance Arbitrary Text.Text where
+    arbitrary = Text.pack <$> arbitrary

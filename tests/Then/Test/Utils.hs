@@ -1,9 +1,15 @@
 module Then.Test.Utils where
 
+import           Control.Applicative
 import           Data.Monoid
+import           Database.PostgreSQL.Simple (Connection, connectPostgreSQL)
+import qualified Data.ByteString.Char8 as BS
 import           Control.Monad.Trans.Either
 import           System.Process (callCommand)
 import           Test.Hspec
+
+import           Then.Login
+import           Then.Types
 
 shouldLeftReturn :: (Show e, Eq e) => EitherT e IO a -> e -> Expectation
 shouldLeftReturn x e
@@ -21,3 +27,9 @@ createDB = callCommand $
 
 testDBName :: String
 testDBName = "test_thendb"
+
+setupDB :: IO Connection
+setupDB = createDB >> connectPostgreSQL (BS.pack $ "dbname=" ++ testDBName)
+
+withUser :: Connection -> User -> IO a -> IO a
+withUser conn usr action = createUser conn usr *> action <* removeUser conn usr

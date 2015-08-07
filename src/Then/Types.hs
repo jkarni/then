@@ -8,20 +8,26 @@ import qualified Data.Text                          as Text
 import           GHC.Generics                       (Generic)
 import           Database.PostgreSQL.Simple.FromRow (FromRow (..), field)
 
-type Token = String
+type Token = Text.Text
 
 -- * Errors
 
 data Error = Error { location    :: Text.Text
                    , description :: Text.Text
+                   , name        :: Text.Text
                    } deriving (Eq, Show, Read, Generic, FromJSON, ToJSON)
+
+data ErrorResponse = ErrorResponse { status :: Status
+                                   , errors :: [Error]
+                                   } deriving (Eq, Show, Read, Generic, FromJSON, ToJSON)
+
 
 
 -- * Login
 
 data LoginByUsername = LoginByUsername
-    { loginByUsernameName     :: String
-    , loginByUsernamePassword :: String
+    { loginByUsernameName     :: Text.Text
+    , loginByUsernamePassword :: Text.Text
     } deriving (Eq, Generic, Show)
 
 instance FromJSON LoginByUsername where
@@ -29,8 +35,8 @@ instance FromJSON LoginByUsername where
                                            <*> v .: "password"
 
 data LoginByEmail = LoginByEmail
-    { loginByEmailName     :: String
-    , loginByEmailPassword :: String
+    { loginByEmailName     :: Text.Text
+    , loginByEmailPassword :: Text.Text
     } deriving (Eq, Generic, Show)
 
 instance FromJSON LoginByEmail where
@@ -38,17 +44,21 @@ instance FromJSON LoginByEmail where
                                         <*> v .: "password"
 
 
-data LoginStatus = Success | Failure
+data Status = Success | Failure
     deriving (Eq, Show, Generic, Read)
 
-instance ToJSON LoginStatus where
+instance FromJSON Status where
+    parseJSON (String "success") = return Success
+    parseJSON (String "error")   = return Failure
+
+instance ToJSON Status where
     toJSON Success = String "success"
     toJSON Failure = String "error"
 
 
 data LoginResult = LoginResult
-    { loginResultStatus   :: LoginStatus
-    , loginResultUserPath :: String
+    { loginResultStatus   :: Status
+    , loginResultUserPath :: Text.Text
     , loginResultToken    :: Token
     } deriving (Eq, Show, Generic, Read)
 
@@ -62,9 +72,9 @@ instance ToJSON LoginResult where
 -- * User
 
 data User = User
-    { username :: String
-    , password :: String
-    , email    :: String
+    { username :: Text.Text
+    , password :: Text.Text
+    , email    :: Text.Text
     } deriving (Eq, Show, Generic, Read)
 
 instance FromRow User where

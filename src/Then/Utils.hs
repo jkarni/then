@@ -11,7 +11,10 @@ import Data.Text ()
 loginError :: Error
 loginError = Error { location = "body"
                    , description = "User doesn't exist or password is wrong"
+                   , name = ""
                    }
 
-errWithBody :: ServantErr -> Error -> ServantErr
-errWithBody se e = se { errBody = encode e }
+
+errWithBody :: ServantErr -> [Error] -> ServantErr
+errWithBody se e = se { errBody = encode
+    ErrorResponse { status = Failure, errors = e }}
