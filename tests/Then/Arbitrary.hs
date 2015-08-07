@@ -5,6 +5,7 @@ module Then.Arbitrary where
 
 import           Control.Monad             (mzero)
 import           Data.Aeson
+import           Data.Char                 (chr)
 import           Data.ByteString           (ByteString)
 import           Data.CaseInsensitive      (CI (..), FoldCase, mk, original)
 import           Network.HTTP.Types        (Header)
@@ -24,7 +25,15 @@ data RequestInfo = RequestInfo
     } deriving (Eq, Read, Show, Generic)
 
 
+newtype AsciiText = AsciiText { unAsciiText :: Text.Text }
+  deriving (Eq, Show, Read, Generic)
+
 -- * Instances
+
+instance Arbitrary AsciiText where
+    arbitrary = do
+      str <- listOf . elements $ chr <$> [32..126]
+      return $! AsciiText (Text.pack str)
 
 instance Arbitrary LoginByUsername where
     arbitrary = LoginByUsername <$> arbitrary <*> arbitrary

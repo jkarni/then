@@ -1,6 +1,5 @@
 module Then.Test.Utils where
 
-import           Control.Applicative
 import           Data.Monoid
 import           Database.PostgreSQL.Simple (Connection, connectPostgreSQL)
 import qualified Data.ByteString.Char8 as BS
