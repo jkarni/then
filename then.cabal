@@ -13,6 +13,7 @@ extra-source-files:  tests/Then/Test/Utils.hs
                    , tests/Then/Arbitrary.hs
                    , tests/Then/LoginSpec.hs
                    , tests/Then/ProxySpec.hs
+                   , tests/Then/TypesSpec.hs
 cabal-version:       >=1.10
 data-files:          schema/then.sql
 
@@ -60,6 +61,7 @@ test-suite spec
                      , postgresql-simple
                      , process
                      , servant-server
+                     , utf8-string
                      , wai
                      , warp
                      , wreq

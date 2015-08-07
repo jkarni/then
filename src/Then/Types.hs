@@ -48,6 +48,7 @@ data LoginByUsername = LoginByUsername
 instance FromJSON LoginByUsername where
     parseJSON (Object v) = LoginByUsername <$> v .: "name"
                                            <*> v .: "password"
+    parseJSON _          = mzero
 
 data LoginByEmail = LoginByEmail
     { loginByEmailName     :: Text.Text
@@ -57,6 +58,7 @@ data LoginByEmail = LoginByEmail
 instance FromJSON LoginByEmail where
     parseJSON (Object v) = LoginByEmail <$> v .: "email"
                                         <*> v .: "password"
+    parseJSON _          = mzero
 
 
 data Status = Success | Failure
@@ -89,11 +91,26 @@ newtype UserCreation = UserCreation { unUserCreation :: User }
 
 instance FromJSON UserCreation where
     parseJSON (Object v) = do
-       d <- v .: "data"
-       name  <- (d .: "adhocracy_core.sheets.principal.IUserBasic") >>=  (.: "name")
-       ema   <- (d .: "adhocracy_core.sheets.principal.IUserExtended") >>= (.: "email")
-       pwd   <- (d .: "adhocracy_core.sheets.principal.IPasswordAuthentication") >>= (.: "password")
-       return $! UserCreation (User { username = name, email = ema, password = pwd })
+      -- So much for leak-free abstractions...
+      d <- v .: "data"
+      name  <- (d .: "adhocracy_core.sheets.principal.IUserBasic") >>=  (.: "name")
+      ema   <- (d .: "adhocracy_core.sheets.principal.IUserExtended") >>= (.: "email")
+      pwd   <- (d .: "adhocracy_core.sheets.principal.IPasswordAuthentication") >>= (.: "password")
+      return $! UserCreation (User { username = name, email = ema, password = pwd })
+    parseJSON _          = mzero
+
+instance ToJSON UserCreation where
+    toJSON (UserCreation usr) = object [ "data" .= d
+                                       , "content_type" .= String "adhocracy_core.resources.principal.IUser"
+                                       ]
+      where
+        n = object [ "name" .= username usr]
+        e = object [ "email" .= email usr]
+        p = object [ "password" .= password usr]
+        d = object [ "adhocracy_core.sheets.principal.IUserBasic" .= n
+                   , "adhocracy_core.sheets.principal.IUserExtended" .= e
+                   , "adhocracy_core.sheets.principal.IPasswordAuthentication" .= p
+                   ]
 
 
 -- * Token

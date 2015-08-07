@@ -3,12 +3,11 @@
 {-# LANGUAGE RecordWildCards   #-}
 module Then.Login where
 
-import           Control.Monad                      (when, void)
+import           Control.Monad                      (void)
 import           Control.Monad.IO.Class             (liftIO)
 import           Control.Monad.Trans.Either
 import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.SqlQQ   (sql)
-import           Database.PostgreSQL.Simple.FromRow
 import           Servant
 
 import           Then.Types
@@ -20,7 +19,7 @@ loginByUsername conn lbu = do
   pwds <- liftIO $ query conn [sql| SELECT password
                                     FROM account
                                     WHERE username = ? |] (Only usr)
-  pwd  <- case pwds of
+  case pwds of
     [Only pwd] -> if pwd /= loginByUsernamePassword lbu
       then left $ err400 `errWithBody` [loginError]
       else return pwd

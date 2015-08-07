@@ -66,3 +66,9 @@ instance Arbitrary ByteString where
 
 instance Arbitrary Text.Text where
     arbitrary = Text.pack <$> arbitrary
+
+instance Arbitrary User where
+    arbitrary = User <$> arbitrary <*> arbitrary <*> arbitrary
+
+instance Arbitrary UserCreation where
+    arbitrary = UserCreation <$> arbitrary
