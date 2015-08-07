@@ -9,14 +9,17 @@ import           Database.PostgreSQL.Simple.FromRow
 import           Servant
 
 import           Then.Types
+import           Then.Utils
 
 loginByUsername :: Connection -> LoginByUsername -> EitherT ServantErr IO LoginResult
 loginByUsername conn lbu = do
   let usr = loginByUsernameName lbu
   pwds <- liftIO $ query conn "SELECT password FROM account where username = ?" (Only usr)
   pwd  <- case pwds of
-    [pwd] -> if pwd /= loginByUsernamePassword lbu then left err400 else return pwd
-    _     -> left err400
+    [pwd] -> if pwd /= loginByUsernamePassword lbu
+      then left $ err400 `errWithBody` loginError
+      else return pwd
+    _     -> left $ err400 `errWithBody` loginError
   token <- liftIO newToken
   return $! LoginResult
     { loginResultStatus   = Success
