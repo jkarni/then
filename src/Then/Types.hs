@@ -84,11 +84,11 @@ instance ToJSON LoginResult where
 
 -- * Token
 
--- | 1024-bit baseurl64-encoding-compliant nonce.
 newtype Token = Token { unToken :: BS.ByteString }
   deriving (Eq, Show)
 
-
+-- | Smart constructor for the opaque @Token@ type.
+-- @Token@ is a 1024-bit baseurl64-encoding-compliant nonce.
 newToken :: IO Token
 newToken = Token . mconcat <$> (sequence . replicate 8 $ Nonce.nonce128url nonceGen)
 
